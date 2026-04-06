@@ -1,0 +1,931 @@
+.pageShell {
+  min-height: 100vh;
+  padding: 28px;
+}
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: 150px minmax(0, 1fr) 310px;
+  gap: 20px;
+  max-width: 1520px;
+  min-height: calc(100vh - 56px);
+  margin: 0 auto;
+}
+
+.board::before {
+  content: "";
+  position: absolute;
+  inset: 24px 24px 16px 24px;
+  border-radius: 36px;
+  background:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.66), rgba(255, 255, 255, 0.2)),
+    linear-gradient(180deg, rgba(255, 226, 194, 0.56), rgba(247, 212, 190, 0.36));
+  box-shadow: var(--shadow);
+  z-index: -1;
+}
+
+.leftRail,
+.mainBoard,
+.rightRail {
+  position: relative;
+  z-index: 1;
+}
+
+.leftRail {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 0;
+}
+
+.brandMark,
+.helperCard,
+.summaryCard,
+.formCard,
+.utilityCard,
+.calendarPanel {
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  background: var(--panel);
+  backdrop-filter: blur(20px);
+  box-shadow:
+    0 18px 50px rgba(132, 87, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.brandMark {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 26px;
+}
+
+.brandMark strong {
+  display: block;
+  margin-top: 4px;
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.brandRing {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  color: #1f5f6e;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.94), rgba(130, 208, 225, 0.92)),
+    linear-gradient(180deg, rgba(56, 169, 202, 0.9), rgba(31, 95, 110, 0.9));
+  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.45);
+}
+
+.eyebrow {
+  display: inline-flex;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(39, 64, 77, 0.58);
+}
+
+.tabRail {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.tabButton {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 60px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 22px;
+  color: var(--ink-strong);
+  background: rgba(255, 253, 250, 0.72);
+  box-shadow: 0 10px 26px rgba(120, 76, 39, 0.08);
+  transition:
+    transform 160ms ease,
+    box-shadow 160ms ease,
+    background 160ms ease;
+}
+
+.tabButton:hover {
+  transform: translateY(-1px);
+}
+
+.tabButtonActive {
+  color: white;
+  background: linear-gradient(135deg, #608eff, #4a6fdf);
+  box-shadow: 0 18px 34px rgba(74, 111, 223, 0.26);
+}
+
+.helperCard {
+  margin-top: auto;
+  padding: 16px;
+  border-radius: 24px;
+}
+
+.helperCard p {
+  margin: 8px 0 0;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.mainBoard {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 26px 0;
+}
+
+.hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 24px 28px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.74), transparent 32%),
+    linear-gradient(135deg, rgba(255, 245, 233, 0.86), rgba(255, 232, 217, 0.7));
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 18px 46px rgba(118, 70, 37, 0.14);
+}
+
+.hero h1 {
+  margin: 8px 0 8px;
+  max-width: 780px;
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: clamp(2rem, 3vw, 3.3rem);
+  line-height: 1.02;
+}
+
+.hero p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+.heroActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filterRow {
+  display: inline-flex;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.75);
+}
+
+.filterButton {
+  min-width: 96px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: transparent;
+}
+
+.filterButtonActive {
+  color: #27404d;
+  background: white;
+  box-shadow: 0 8px 18px rgba(115, 78, 35, 0.12);
+}
+
+.contentColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.panelHeader h2 {
+  margin: 6px 0 0;
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+  font-size: 1.9rem;
+}
+
+.panelHint {
+  padding: 8px 12px;
+  border-radius: 999px;
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.activityList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activityCard {
+  padding: 18px;
+  border-radius: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(255, 245, 236, 0.85)),
+    linear-gradient(130deg, color-mix(in srgb, var(--card-accent) 20%, white), transparent 62%);
+  box-shadow: 0 18px 42px rgba(118, 71, 34, 0.1);
+}
+
+.activityTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.activityIdentity {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  min-width: 0;
+}
+
+.iconBadge {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 54px;
+  height: 54px;
+  border-radius: 18px;
+  color: var(--ink-strong);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.84), rgba(255, 255, 255, 0.46)),
+    color-mix(in srgb, var(--card-accent) 30%, white);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+.activityMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.categoryChip,
+.ghostChip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.categoryChip {
+  color: color-mix(in srgb, var(--card-accent) 34%, #27404d);
+  background: color-mix(in srgb, var(--card-accent) 22%, white);
+}
+
+.ghostChip {
+  color: var(--ink-soft);
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.activityCard h3 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.activityCard p {
+  margin: 6px 0 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+  min-width: 124px;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.status_success {
+  color: #0f7244;
+  background: rgba(116, 212, 154, 0.24);
+}
+
+.status_warning {
+  color: #9a6302;
+  background: rgba(255, 207, 90, 0.28);
+}
+
+.status_active {
+  color: #2455b9;
+  background: rgba(102, 143, 255, 0.2);
+}
+
+.status_idle {
+  color: #6a7882;
+  background: rgba(128, 144, 156, 0.16);
+}
+
+.ruleGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.rulePill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  padding: 0 14px;
+  border-radius: 16px;
+  color: var(--ink-strong);
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(39, 64, 77, 0.08);
+}
+
+.ruleComplete {
+  color: #0f7244;
+  background: rgba(116, 212, 154, 0.18);
+}
+
+.ruleCapped {
+  border-color: rgba(255, 175, 54, 0.4);
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.cardFacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+.cardActions,
+.utilityActions,
+.registryActions,
+.formActions,
+.calendarControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryButton,
+.secondaryButton,
+.iconButton,
+.weekdayButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 14px;
+  border: 0;
+  transition:
+    transform 160ms ease,
+    opacity 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.primaryButton:hover,
+.secondaryButton:hover,
+.iconButton:hover,
+.weekdayButton:hover {
+  transform: translateY(-1px);
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.primaryButton {
+  color: white;
+  background: linear-gradient(135deg, #ef8466, #e26b7b);
+  box-shadow: 0 16px 30px rgba(226, 107, 123, 0.26);
+}
+
+.secondaryButton,
+.iconButton,
+.weekdayButton {
+  color: var(--ink-strong);
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 12px 26px rgba(118, 71, 34, 0.08);
+}
+
+.rewardTrack {
+  padding: 22px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  background:
+    linear-gradient(180deg, rgba(255, 250, 243, 0.9), rgba(255, 238, 227, 0.86)),
+    linear-gradient(135deg, rgba(90, 124, 255, 0.1), rgba(255, 159, 104, 0.14));
+  box-shadow: 0 18px 42px rgba(118, 71, 34, 0.1);
+}
+
+.rewardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.rewardHeader h3 {
+  margin: 6px 0 0;
+  font-size: 1.6rem;
+  font-family: "Iowan Old Style", "Palatino Linotype", serif;
+}
+
+.rewardSummary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink-soft);
+}
+
+.trackBar {
+  position: relative;
+  height: 16px;
+  margin-top: 24px;
+  border-radius: 999px;
+  background: rgba(39, 64, 77, 0.08);
+}
+
+.trackFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #57c398, #63aaf8, #ff8a66);
+}
+
+.trackMarker {
+  position: absolute;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--ink-soft);
+  background: white;
+  box-shadow: 0 12px 28px rgba(116, 71, 34, 0.12);
+}
+
+.trackMarker span {
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.trackMarkerActive {
+  color: white;
+  background: linear-gradient(135deg, #57c398, #63aaf8);
+}
+
+.rightRail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px 0;
+}
+
+.summaryCard,
+.utilityCard {
+  padding: 18px;
+  border-radius: 28px;
+}
+
+.summaryHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.queueList,
+.milestoneList,
+.registryList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.queueItem,
+.calendarItem,
+.milestoneItem,
+.registryItem {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.queueItem,
+.calendarItem,
+.registryTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.queueMeta,
+.calendarItem {
+  align-items: center;
+}
+
+.queueMeta h4,
+.calendarItem h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.queueMeta p,
+.calendarItem p,
+.registryItem p,
+.calendarEmpty,
+.helperText {
+  margin: 4px 0 0;
+  color: var(--ink-soft);
+  line-height: 1.45;
+}
+
+.queueAccent,
+.calendarDot {
+  width: 12px;
+  height: 12px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.metricCard {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.64);
+}
+
+.metricCard span {
+  display: block;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.metricCard strong {
+  display: block;
+  margin-top: 8px;
+  font-size: 1.9rem;
+}
+
+.milestoneItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.milestoneDone {
+  color: #0f7244;
+  background: rgba(116, 212, 154, 0.18);
+}
+
+.calendarPanel {
+  padding: 22px;
+  border-radius: 30px;
+}
+
+.weekLabel {
+  min-width: 140px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.calendarGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.calendarDay {
+  min-height: 360px;
+  padding: 14px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.calendarToday {
+  background: linear-gradient(180deg, rgba(255, 240, 223, 0.92), rgba(255, 255, 255, 0.72));
+  box-shadow: inset 0 0 0 2px rgba(239, 132, 102, 0.28);
+}
+
+.calendarDayHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 12px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(39, 64, 77, 0.08);
+}
+
+.calendarDayHeader strong {
+  font-size: 1.05rem;
+}
+
+.calendarEvents {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.calendarEmpty {
+  padding: 12px;
+}
+
+.manageLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 18px;
+}
+
+.formCard {
+  padding: 22px;
+  border-radius: 30px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field span,
+.weekdayPicker > span {
+  font-weight: 700;
+}
+
+.input,
+.colorInput {
+  width: 100%;
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(39, 64, 77, 0.12);
+  color: var(--ink-strong);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.textarea {
+  min-height: 120px;
+  padding: 14px;
+  resize: vertical;
+}
+
+.colorRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.colorInput {
+  width: 66px;
+  padding: 4px;
+}
+
+.swatchRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.6);
+}
+
+.swatchActive {
+  outline: 3px solid rgba(39, 64, 77, 0.18);
+}
+
+.ruleTable {
+  margin-top: 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(39, 64, 77, 0.08);
+}
+
+.ruleTableHeader,
+.ruleTableRow {
+  display: grid;
+  grid-template-columns: 1fr 120px 120px;
+  gap: 10px;
+  padding: 14px;
+  align-items: center;
+}
+
+.ruleTableHeader {
+  background: rgba(255, 255, 255, 0.72);
+  font-weight: 800;
+}
+
+.ruleTableRow {
+  border-top: 1px solid rgba(39, 64, 77, 0.06);
+}
+
+.weekdayPicker {
+  margin-top: 18px;
+}
+
+.weekdayRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.weekdayButtonActive {
+  color: white;
+  background: linear-gradient(135deg, #5a7cff, #66c7ff);
+}
+
+.formActions {
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.manageSide {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.registryItem h3 {
+  margin: 8px 0 0;
+}
+
+.registryStats {
+  text-align: right;
+}
+
+.registryStats strong {
+  display: block;
+  font-size: 1.8rem;
+}
+
+.loadingPanel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 56px auto;
+  padding: 18px 22px;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.74);
+  box-shadow: 0 18px 42px rgba(118, 71, 34, 0.12);
+}
+
+@media (max-width: 1240px) {
+  .board {
+    grid-template-columns: 1fr;
+  }
+
+  .board::before {
+    inset: 0;
+  }
+
+  .leftRail,
+  .rightRail,
+  .mainBoard {
+    padding: 0;
+  }
+
+  .leftRail {
+    gap: 14px;
+  }
+
+  .tabRail {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .tabButton {
+    min-height: 52px;
+  }
+
+  .rightRail {
+    order: 3;
+  }
+}
+
+@media (max-width: 980px) {
+  .pageShell {
+    padding: 18px;
+  }
+
+  .manageLayout,
+  .formGrid,
+  .calendarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero,
+  .activityTop,
+  .cardFooter,
+  .rewardHeader,
+  .registryTop,
+  .panelHeader {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .statusBadge {
+    min-width: 0;
+  }
+
+  .ruleTableHeader,
+  .ruleTableRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .pageShell {
+    padding: 12px;
+  }
+
+  .hero {
+    padding: 20px;
+  }
+
+  .activityCard,
+  .rewardTrack,
+  .summaryCard,
+  .formCard,
+  .calendarPanel,
+  .utilityCard {
+    border-radius: 24px;
+  }
+
+  .cardActions,
+  .utilityActions,
+  .formActions,
+  .registryActions {
+    width: 100%;
+  }
+
+  .primaryButton,
+  .secondaryButton {
+    width: 100%;
+  }
+
+  .trackMarker {
+    width: 34px;
+    height: 34px;
+  }
+
+  .trackMarker span {
+    font-size: 0.64rem;
+  }
+}

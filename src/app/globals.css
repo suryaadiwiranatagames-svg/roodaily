@@ -1,0 +1,166 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: #1e293b;
+  font-family:
+    "Avenir Next",
+    "Segoe UI",
+    sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #c5b49e #f1f1f1;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #c5b49e;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #a6947c;
+}
+
+.quest-pop-in {
+  animation: quest-pop-in 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.animate-float-up {
+  animation: floatUp 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  left: 50%;
+}
+
+@keyframes quest-pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -40px) scale(1.08);
+  }
+}
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .quest-progress-bar {
+    padding-top: 1.75rem;
+    padding-right: 0.875rem;
+    padding-bottom: 0.5rem;
+    padding-left: 0.875rem;
+  }
+
+  .quest-progress-reset-label {
+    top: 0.3rem;
+    right: 0.875rem;
+    font-size: 9px;
+  }
+
+  .quest-progress-floor {
+    height: 0.85rem;
+  }
+
+  .quest-progress-left {
+    margin-bottom: 0;
+  }
+
+  .quest-progress-bunny-shell {
+    width: 2.4rem;
+    height: 3.5rem;
+    margin-right: 0.35rem;
+  }
+
+  .quest-progress-bunny {
+    width: 38px;
+    padding-bottom: 0;
+  }
+
+  .quest-progress-ap {
+    margin-right: 0.5rem;
+    margin-bottom: 0.35rem;
+    padding: 0.2rem 0.65rem;
+  }
+
+  .quest-progress-ap-icon {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .quest-progress-ap-value {
+    font-size: 1.65rem;
+    line-height: 1;
+  }
+
+  .quest-progress-track {
+    height: 0.55rem;
+    margin-bottom: 0.8rem;
+    margin-left: 0.35rem;
+    margin-right: 0.35rem;
+  }
+
+  .quest-progress-chest {
+    margin-top: -2rem;
+  }
+
+  .quest-progress-chest-art {
+    width: 1.9rem;
+    height: 2.2rem;
+  }
+
+  .quest-progress-milestone {
+    margin-top: 0.35rem;
+    font-size: 10px;
+    line-height: 1;
+  }
+}
