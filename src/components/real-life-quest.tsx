@@ -25,6 +25,8 @@ import {
   PenTool,
   Plane,
   Plus,
+  Play,
+  Pause,
   ShoppingCart,
   Smile,
   Star,
@@ -110,7 +112,10 @@ const AVATARS = [
 ] as const;
 
 const STORAGE_KEY = "rlq_data";
+const MUSIC_STORAGE_KEY = "rlq_music_enabled";
 const PRONTERA_BACKGROUND = 'url("/prontera-bg.jpg")';
+const PRONTERA_BGM = "/prontera-bgm.mp3";
+const PRONTERA_BGM_VOLUME = 0.35;
 
 type IconName = keyof typeof ICON_MAP;
 type IconColor = (typeof COLOR_OPTIONS)[number];
@@ -143,6 +148,11 @@ type HistoryEntry = {
 type ExpEffect = {
   id: number;
   milestone: number;
+};
+
+type LevelUpEffect = {
+  id: number;
+  level: number;
 };
 
 type UserProfile = {
@@ -219,71 +229,64 @@ const INITIAL_TASKS: Task[] = [
     iconColor: "text-teal-500",
   },
   {
-    id: "t_tidur",
-    title: "Tidur Cukup (7-8 Jam)",
+    id: "t_bangun",
+    title: "Bangun Tidur (6-8 Jam)",
     apReward: 15,
     dailyProgress: 0,
     dailyMax: 1,
-    iconName: "Heart",
-    iconColor: "text-indigo-400",
+    iconName: "Coffee",
+    iconColor: "text-indigo-500",
   },
   {
-    id: "t3",
-    title: "Sesi Gym",
+    id: "t_ibadah",
+    title: "Ibadah Lengkap",
+    apReward: 15,
+    dailyProgress: 0,
+    dailyMax: 1,
+    iconName: "Book",
+    iconColor: "text-yellow-500",
+  },
+  {
+    id: "t_olahraga",
+    title: "Olahraga",
     apReward: 20,
     dailyProgress: 0,
     dailyMax: 1,
     weeklyProgress: 0,
-    weeklyMax: 5,
+    weeklyMax: 4,
     iconName: "Dumbbell",
     iconColor: "text-slate-600",
   },
   {
-    id: "t_baca",
-    title: "Membaca / Belajar (30mnt)",
-    apReward: 15,
+    id: "t_ngedate",
+    title: "Ngedate Sama Pasangan",
+    apReward: 25,
     dailyProgress: 0,
     dailyMax: 1,
-    iconName: "BookOpen",
-    iconColor: "text-purple-500",
+    weeklyProgress: 0,
+    weeklyMax: 2,
+    iconName: "Heart",
+    iconColor: "text-pink-500",
   },
   {
-    id: "t_bersih",
-    title: "Deep Clean Rumah",
-    apReward: 30,
+    id: "t_liburan",
+    title: "Liburan / Healing / Staycation",
+    apReward: 40,
     weeklyProgress: 0,
     weeklyMax: 1,
-    iconName: "Zap",
-    iconColor: "text-yellow-500",
-  },
-  {
-    id: "t4",
-    title: "Staycation / Healing",
-    apReward: 50,
     monthlyProgress: 0,
-    monthlyMax: 1,
+    monthlyMax: 2,
     iconName: "Tent",
     iconColor: "text-green-600",
   },
   {
-    id: "t_tagihan",
-    title: "Bayar Tagihan Bulanan",
-    apReward: 40,
-    monthlyProgress: 0,
-    monthlyMax: 1,
-    iconName: "Briefcase",
-    iconColor: "text-slate-700",
-  },
-  {
-    id: "t5",
-    title: "Medical Check-up",
-    apReward: 100,
-    monthlyProgress: 0,
-    monthlyMax: 1,
-    yearlyProgress: 0,
-    yearlyMax: 2,
-    iconName: "Stethoscope",
-    iconColor: "text-red-500",
+    id: "t_beres",
+    title: "Beres-beres Rumah",
+    apReward: 25,
+    weeklyProgress: 0,
+    weeklyMax: 1,
+    iconName: "Zap",
+    iconColor: "text-yellow-500",
   },
 ];
 
@@ -633,6 +636,7 @@ export default function RealLifeQuest() {
   const historyIdRef = useRef(1);
   const customTaskIdRef = useRef(1);
   const effectIdRef = useRef(1);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [activeTab, setActiveTab] = useState<"event" | "calendar">("event");
   const [activityPoints, setActivityPoints] = useState(0);
@@ -641,12 +645,22 @@ export default function RealLifeQuest() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [claimedChests, setClaimedChests] = useState<number[]>([]);
   const [expEffects, setExpEffects] = useState<ExpEffect[]>([]);
+  const [levelUpEffect, setLevelUpEffect] = useState<LevelUpEffect | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [draftProfile, setDraftProfile] =
     useState<DraftProfile>(DEFAULT_DRAFT_PROFILE);
   const [showAddModal, setShowAddModal] = useState(false);
   const [newTask, setNewTask] = useState<NewTaskDraft>(DEFAULT_NEW_TASK);
+  const [musicEnabled, setMusicEnabled] = useState(() => {
+    if (typeof window === "undefined") {
+      return true;
+    }
+
+    const savedPreference = window.localStorage.getItem(MUSIC_STORAGE_KEY);
+    return savedPreference === null ? true : savedPreference === "true";
+  });
+  const [musicBlocked, setMusicBlocked] = useState(false);
 
   useEffect(() => {
     const savedData = window.localStorage.getItem(STORAGE_KEY);
@@ -734,6 +748,52 @@ export default function RealLifeQuest() {
 
     return () => window.clearInterval(interval);
   }, [dates, isLoaded, offsetDays]);
+
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    audio.volume = PRONTERA_BGM_VOLUME;
+    window.localStorage.setItem(MUSIC_STORAGE_KEY, String(musicEnabled));
+
+    if (!musicEnabled) {
+      audio.pause();
+      return;
+    }
+
+    void audio.play().then(
+      () => setMusicBlocked(false),
+      () => setMusicBlocked(true),
+    );
+  }, [musicEnabled, isLoaded]);
+
+  useEffect(() => {
+    if (!musicEnabled || !musicBlocked) {
+      return;
+    }
+
+    const resumeMusic = () => {
+      const audio = audioRef.current;
+      if (!audio) {
+        return;
+      }
+
+      void audio.play().then(
+        () => setMusicBlocked(false),
+        () => undefined,
+      );
+    };
+
+    window.addEventListener("pointerdown", resumeMusic, { once: true });
+    window.addEventListener("keydown", resumeMusic, { once: true });
+
+    return () => {
+      window.removeEventListener("pointerdown", resumeMusic);
+      window.removeEventListener("keydown", resumeMusic);
+    };
+  }, [musicBlocked, musicEnabled]);
 
   const handleAction = (task: Task) => {
     if (task.dailyMax && (task.dailyProgress || 0) >= task.dailyMax) {
@@ -902,11 +962,27 @@ export default function RealLifeQuest() {
     }
 
     setClaimedChests((previousClaimed) => [...previousClaimed, milestone]);
-    setUserProfile((previousProfile) =>
-      previousProfile
-        ? { ...previousProfile, totalExp: (previousProfile.totalExp || 0) + 10 }
-        : previousProfile,
-    );
+    if (userProfile) {
+      const previousLevel = getLevelInfo(userProfile.totalExp).level;
+      const nextTotalExp = (userProfile.totalExp || 0) + 10;
+      const nextLevel = getLevelInfo(nextTotalExp).level;
+
+      setUserProfile({
+        ...userProfile,
+        totalExp: nextTotalExp,
+      });
+
+      if (nextLevel > previousLevel) {
+        const effectId = effectIdRef.current;
+        effectIdRef.current += 1;
+        setLevelUpEffect({ id: effectId, level: nextLevel });
+        window.setTimeout(() => {
+          setLevelUpEffect((currentEffect) =>
+            currentEffect?.id === effectId ? null : currentEffect,
+          );
+        }, 2400);
+      }
+    }
 
     const effectId = effectIdRef.current;
     effectIdRef.current += 1;
@@ -1023,209 +1099,305 @@ export default function RealLifeQuest() {
     );
   };
 
+  const isMusicPlaying = musicEnabled && !musicBlocked;
+
+  const handleToggleMusic = () => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    if (isMusicPlaying) {
+      audio.pause();
+      setMusicEnabled(false);
+      setMusicBlocked(false);
+      return;
+    }
+
+    setMusicEnabled(true);
+    void audio.play().then(
+      () => setMusicBlocked(false),
+      () => setMusicBlocked(true),
+    );
+  };
+
+  function renderMusicControl() {
+    const ControlIcon = isMusicPlaying ? Pause : Play;
+
+    return (
+      <button
+        onClick={handleToggleMusic}
+        type="button"
+        className="fixed top-4 left-4 z-50 flex items-center gap-3 rounded-full border-2 border-[#e8d5b5] bg-[#fffaf0]/95 px-3 py-2 text-left shadow-lg backdrop-blur sm:top-5 sm:left-5"
+      >
+        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-b from-[#6ca4f4] to-[#4b7dd1] text-white shadow-sm">
+          <Music className="h-4 w-4" />
+        </div>
+        <div className="min-w-0">
+          <span className="block text-[10px] font-bold tracking-[0.2em] text-[#a08b74] uppercase">
+            Prontera BGM
+          </span>
+          <strong className="block text-xs font-black text-slate-700">
+            {isMusicPlaying ? "Pause music" : "Play music"}
+          </strong>
+          {musicBlocked ? (
+            <span className="block text-[10px] font-bold text-[#c07c50]">
+              Will start on your first tap
+            </span>
+          ) : null}
+        </div>
+        <div className="flex h-8 w-8 items-center justify-center rounded-full border border-[#d8c6ae] bg-white text-[#5c85d6]">
+          <ControlIcon className="h-4 w-4" />
+        </div>
+      </button>
+    );
+  }
+
+  const musicLayer = (
+    <>
+      <audio autoPlay ref={audioRef} loop preload="auto" src={PRONTERA_BGM} />
+      {isLoaded ? renderMusicControl() : null}
+    </>
+  );
+
+  const levelUpOverlay = levelUpEffect ? (
+    <div className="pointer-events-none fixed inset-0 z-[80] flex items-center justify-center overflow-hidden">
+      <div className="absolute inset-0 bg-[#1f3150]/18 backdrop-blur-[2px]" />
+      <div className="level-up-ring absolute h-56 w-56 rounded-full border-[10px] border-yellow-300/60" />
+      <div className="level-up-ring level-up-ring-delay absolute h-72 w-72 rounded-full border-[6px] border-white/55" />
+      <div className="level-up-pop relative mx-4 flex w-full max-w-sm flex-col items-center rounded-[28px] border-[3px] border-[#f4d9a7] bg-[#fffaf0]/96 px-8 py-7 text-center shadow-[0_16px_50px_rgba(0,0,0,0.22)]">
+        <div className="level-up-starburst absolute inset-x-0 -top-12 flex items-center justify-center gap-6 text-[#ffb347]">
+          <Star className="h-7 w-7 fill-current" />
+          <Flame className="h-10 w-10" />
+          <Star className="h-7 w-7 fill-current" />
+        </div>
+        <span className="rounded-full border border-[#ffd28a] bg-[#fff3d8] px-4 py-1 text-[10px] font-black tracking-[0.28em] text-[#c07c50] uppercase">
+          Congratulations
+        </span>
+        <strong className="mt-4 text-3xl font-black tracking-wide text-[#5c85d6]">
+          Level {levelUpEffect.level}
+        </strong>
+        <p className="mt-2 text-sm font-bold text-slate-700">
+          {userProfile?.name || "Hero"} naik level. Lanjutkan quest hari ini.
+        </p>
+      </div>
+    </div>
+  ) : null;
+
   if (!isLoaded) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-900">
-        <div className="quest-pop-in rounded-2xl border border-white/30 bg-[#fffaf0]/90 px-5 py-3 text-sm font-bold text-slate-700 shadow-xl">
-          Loading quest board...
+      <>
+        {musicLayer}
+        <div className="flex min-h-screen items-center justify-center bg-slate-900">
+          <div className="quest-pop-in rounded-2xl border border-white/30 bg-[#fffaf0]/90 px-5 py-3 text-sm font-bold text-slate-700 shadow-xl">
+            Loading quest board...
+          </div>
         </div>
-      </div>
+      </>
     );
   }
 
   if (!userProfile) {
     return (
+      <>
+        {musicLayer}
+        {levelUpOverlay}
+        <div
+          className="relative flex min-h-screen items-center justify-center bg-slate-900 p-4 font-sans"
+          style={{
+            backgroundImage: PRONTERA_BACKGROUND,
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+          }}
+        >
+          <div className="absolute inset-0 bg-black/45" />
+          <div className="quest-pop-in relative z-10 w-full max-w-md rounded-3xl border-[3px] border-[#e8d5b5] bg-[#fffaf0]/96 p-6 shadow-2xl md:p-8">
+            <div className="mb-6 text-center">
+              <div className="relative mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#e8d5b5] text-4xl shadow-md">
+                <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
+                <span className="relative z-10">{draftProfile.avatar}</span>
+              </div>
+              <h2 className="text-2xl font-black tracking-wide text-slate-800">
+                Buat Karakter
+              </h2>
+              <p className="mt-1 text-sm font-medium text-[#a08b74]">
+                Persiapkan dirimu sebelum memulai Quest!
+              </p>
+            </div>
+              <div>
+                <form
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    setUserProfile({ ...draftProfile, totalExp: 0 });
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                      Nama Karakter
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      maxLength={20}
+                      placeholder="Nama jagoanmu..."
+                      value={draftProfile.name}
+                      onChange={(event) =>
+                        setDraftProfile({ ...draftProfile, name: event.target.value })
+                      }
+                      className="w-full rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                        Usia
+                      </label>
+                      <input
+                        type="number"
+                        min="5"
+                        max="100"
+                        required
+                        placeholder="Tahun"
+                        value={draftProfile.age}
+                        onChange={(event) =>
+                          setDraftProfile({ ...draftProfile, age: event.target.value })
+                        }
+                        className="w-full rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 text-center font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                        Gender
+                      </label>
+                      <select
+                        value={draftProfile.gender}
+                        onChange={(event) =>
+                          setDraftProfile({
+                            ...draftProfile,
+                            gender: event.target.value,
+                          })
+                        }
+                        className="w-full cursor-pointer rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
+                      >
+                        <option value="Laki-laki">Laki-laki</option>
+                        <option value="Perempuan">Perempuan</option>
+                        <option value="Lainnya">Lainnya</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                      Pilih Avatar
+                    </label>
+                    <div className="custom-scrollbar h-40 overflow-y-auto rounded-xl border border-[#e8d5b5] bg-white p-3 shadow-inner">
+                      <div className="grid grid-cols-4 gap-2">
+                        {AVATARS.map((avatar) => (
+                          <button
+                            type="button"
+                            key={avatar}
+                            onClick={() => setDraftProfile({ ...draftProfile, avatar })}
+                            className={`rounded-xl p-2 text-2xl transition-all duration-200 ${
+                              draftProfile.avatar === avatar
+                                ? "scale-105 transform border-2 border-orange-200 bg-[#d4a373] text-white shadow-md"
+                                : "border border-slate-100 bg-slate-50 hover:scale-105 hover:bg-slate-100"
+                            }`}
+                          >
+                            {avatar}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2">
+                    <button
+                      type="submit"
+                      className="flex w-full items-center justify-center rounded-xl border border-[#8ec0ff] bg-gradient-to-b from-[#6ca4f4] to-[#4b7dd1] py-3.5 text-lg font-black tracking-wide text-white shadow-[0_4px_0_#2b5296] transition-all active:scale-95 hover:translate-y-[2px] hover:from-[#5b90dd] hover:to-[#3a6bc0] hover:shadow-[0_2px_0_#2b5296]"
+                    >
+                      <Flame className="mr-2 h-5 w-5" />
+                      Mulai Petualangan
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {musicLayer}
+      {levelUpOverlay}
       <div
-        className="relative flex min-h-screen items-center justify-center bg-slate-900 p-4 font-sans"
+        className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-2 font-sans sm:p-4 md:p-8"
         style={{
           backgroundImage: PRONTERA_BACKGROUND,
           backgroundSize: "cover",
           backgroundPosition: "center",
         }}
       >
-        <div className="absolute inset-0 bg-black/45" />
-        <div className="quest-pop-in relative z-10 w-full max-w-md rounded-3xl border-[3px] border-[#e8d5b5] bg-[#fffaf0]/96 p-6 shadow-2xl md:p-8">
-          <div className="mb-6 text-center">
-            <div className="relative mx-auto mb-3 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-[#e8d5b5] text-4xl shadow-md">
-              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/10" />
-              <span className="relative z-10">{draftProfile.avatar}</span>
-            </div>
-            <h2 className="text-2xl font-black tracking-wide text-slate-800">
-              Buat Karakter
-            </h2>
-            <p className="mt-1 text-sm font-medium text-[#a08b74]">
-              Persiapkan dirimu sebelum memulai Quest!
-            </p>
-          </div>
+        <div className="absolute inset-0 bg-[#fffaf0]/55" />
 
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              setUserProfile({ ...draftProfile, totalExp: 0 });
-            }}
-            className="space-y-4"
-          >
-            <div>
-              <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                Nama Karakter
-              </label>
-              <input
-                type="text"
-                required
-                maxLength={20}
-                placeholder="Nama jagoanmu..."
-                value={draftProfile.name}
-                onChange={(event) =>
-                  setDraftProfile({ ...draftProfile, name: event.target.value })
-                }
-                className="w-full rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                  Usia
-                </label>
-                <input
-                  type="number"
-                  min="5"
-                  max="100"
-                  required
-                  placeholder="Tahun"
-                  value={draftProfile.age}
-                  onChange={(event) =>
-                    setDraftProfile({ ...draftProfile, age: event.target.value })
-                  }
-                  className="w-full rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 text-center font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
-                />
-              </div>
-              <div>
-                <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                  Gender
-                </label>
-                <select
-                  value={draftProfile.gender}
-                  onChange={(event) =>
-                    setDraftProfile({
-                      ...draftProfile,
-                      gender: event.target.value,
-                    })
-                  }
-                  className="w-full cursor-pointer rounded-xl border border-[#e8d5b5] bg-white px-4 py-2.5 font-bold text-slate-800 shadow-inner outline-none transition-all focus:border-[#d4a373] focus:ring-2 focus:ring-[#d4a373]/30"
+        {showAddModal ? (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 p-4 backdrop-blur-[1px]">
+            <div className="quest-pop-in w-full max-w-md overflow-hidden rounded-2xl border-[3px] border-[#e8d5b5] bg-[#fffaf0] shadow-xl">
+              <div className="flex items-center justify-between border-b-2 border-[#3a6bc0] bg-gradient-to-r from-[#6ca4f4] to-[#4b7dd1] p-4 text-white">
+                <h3 className="flex items-center text-lg font-bold tracking-wide">
+                  <Star className="mr-2 h-5 w-5 fill-yellow-300 text-yellow-300" />
+                  Buat Custom Event
+                </h3>
+                <button
+                  onClick={() => setShowAddModal(false)}
+                  className="rounded-full p-1 transition-colors hover:bg-white/20"
+                  type="button"
                 >
-                  <option value="Laki-laki">Laki-laki</option>
-                  <option value="Perempuan">Perempuan</option>
-                  <option value="Lainnya">Lainnya</option>
-                </select>
+                  <X className="h-5 w-5" />
+                </button>
               </div>
-            </div>
 
-            <div>
-              <label className="mb-2 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                Pilih Avatar
-              </label>
-              <div className="custom-scrollbar h-40 overflow-y-auto rounded-xl border border-[#e8d5b5] bg-white p-3 shadow-inner">
-                <div className="grid grid-cols-4 gap-2">
-                  {AVATARS.map((avatar) => (
-                    <button
-                      type="button"
-                      key={avatar}
-                      onClick={() => setDraftProfile({ ...draftProfile, avatar })}
-                      className={`rounded-xl p-2 text-2xl transition-all duration-200 ${
-                        draftProfile.avatar === avatar
-                          ? "scale-105 transform border-2 border-orange-200 bg-[#d4a373] text-white shadow-md"
-                          : "border border-slate-100 bg-slate-50 hover:scale-105 hover:bg-slate-100"
-                      }`}
-                    >
-                      {avatar}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                className="flex w-full items-center justify-center rounded-xl border border-[#8ec0ff] bg-gradient-to-b from-[#6ca4f4] to-[#4b7dd1] py-3.5 text-lg font-black tracking-wide text-white shadow-[0_4px_0_#2b5296] transition-all active:scale-95 hover:translate-y-[2px] hover:from-[#5b90dd] hover:to-[#3a6bc0] hover:shadow-[0_2px_0_#2b5296]"
+              <form
+                onSubmit={handleCreateCustomTask}
+                className="custom-scrollbar max-h-[80vh] space-y-4 overflow-y-auto p-6"
               >
-                <Flame className="mr-2 h-5 w-5" />
-                Mulai Petualangan
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden p-2 font-sans sm:p-4 md:p-8"
-      style={{
-        backgroundImage: PRONTERA_BACKGROUND,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-      }}
-    >
-      <div className="absolute inset-0 bg-[#fffaf0]/55" />
-
-      {showAddModal ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/65 p-4 backdrop-blur-[1px]">
-          <div className="quest-pop-in w-full max-w-md overflow-hidden rounded-2xl border-[3px] border-[#e8d5b5] bg-[#fffaf0] shadow-xl">
-            <div className="flex items-center justify-between border-b-2 border-[#3a6bc0] bg-gradient-to-r from-[#6ca4f4] to-[#4b7dd1] p-4 text-white">
-              <h3 className="flex items-center text-lg font-bold tracking-wide">
-                <Star className="mr-2 h-5 w-5 fill-yellow-300 text-yellow-300" />
-                Buat Custom Event
-              </h3>
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="rounded-full p-1 transition-colors hover:bg-white/20"
-                type="button"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <form
-              onSubmit={handleCreateCustomTask}
-              className="custom-scrollbar max-h-[80vh] space-y-4 overflow-y-auto p-6"
-            >
-              <div>
-                <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                  Nama Event
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Contoh: Baca Buku 30 Menit"
-                  value={newTask.title}
-                  onChange={(event) =>
-                    setNewTask({ ...newTask, title: event.target.value })
-                  }
-                  className="w-full rounded-lg border border-[#e8d5b5] bg-white px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:border-[#d4a373] focus:ring-1 focus:ring-[#d4a373]"
-                />
-              </div>
-
-              <div>
-                <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
-                  Hadiah Activity Point (AP)
-                </label>
-                <div className="flex items-center">
-                  <Flame className="mr-2 h-5 w-5 text-orange-500 drop-shadow-sm" />
+                <div>
+                  <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                    Nama Event
+                  </label>
                   <input
-                    type="number"
-                    min="1"
+                    type="text"
                     required
-                    value={newTask.apReward}
+                    placeholder="Contoh: Baca Buku 30 Menit"
+                    value={newTask.title}
                     onChange={(event) =>
-                      setNewTask({ ...newTask, apReward: event.target.value })
+                      setNewTask({ ...newTask, title: event.target.value })
                     }
-                    className="w-24 rounded-lg border border-[#e8d5b5] bg-white px-3 py-2 text-center font-bold text-orange-600 shadow-inner outline-none focus:border-[#d4a373] focus:ring-1 focus:ring-[#d4a373]"
+                    className="w-full rounded-lg border border-[#e8d5b5] bg-white px-3 py-2 font-medium text-slate-800 shadow-inner outline-none focus:border-[#d4a373] focus:ring-1 focus:ring-[#d4a373]"
                   />
                 </div>
-              </div>
+
+                <div>
+                  <label className="mb-1 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
+                    Hadiah Activity Point (AP)
+                  </label>
+                  <div className="flex items-center">
+                    <Flame className="mr-2 h-5 w-5 text-orange-500 drop-shadow-sm" />
+                    <input
+                      type="number"
+                      min="1"
+                      required
+                      value={newTask.apReward}
+                      onChange={(event) =>
+                        setNewTask({ ...newTask, apReward: event.target.value })
+                      }
+                      className="w-24 rounded-lg border border-[#e8d5b5] bg-white px-3 py-2 text-center font-bold text-orange-600 shadow-inner outline-none focus:border-[#d4a373] focus:ring-1 focus:ring-[#d4a373]"
+                    />
+                  </div>
+                </div>
 
               <div>
                 <label className="mb-2 block text-xs font-bold tracking-wider text-[#a08b74] uppercase">
@@ -1605,5 +1777,6 @@ export default function RealLifeQuest() {
         </div>
       </div>
     </div>
+    </>
   );
 }
